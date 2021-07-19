@@ -64,3 +64,29 @@ def user_login(request):
             return HttpResponseRedirect(reverse("user_login"))
     else:
         return render(request, "registration/login_form.html", context={})
+
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("user_login"))
+
+
+
+@login_required(login_url='/accounts/login/')
+def submit_project(request):
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.user = request.user
+            project.save()
+            messages.success(request, f'Project successfully uploaded')
+            form = ProjectForm()
+    else:
+        form = ProjectForm()
+
+
+    context={
+        "form":form
+    }
+
+    return render(request,'new_project.html',context)
