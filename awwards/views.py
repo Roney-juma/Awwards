@@ -120,3 +120,100 @@ def get_project_ratings_av(prj_id):
         'score':0.00,
         }
         return av_ratings
+
+@login_required(login_url='/accounts/login/')
+def view_project(request,prj_id):
+    project = Project.get_project_by_id(prj_id)
+    ratings=get_project_ratings_av(prj_id)
+    raters=Rating.get_project_ratings(prj_id)
+    already_rated=False
+    for user in raters:
+        if request.user==user.user:
+            already_rated=True
+    if request.method == 'POST':
+        form = RatingsForm(request.POST)
+        if form.is_valid():
+            rate = form.save(commit=False)
+            rate.user = request.user
+            rate.project = project
+            design=int(request.POST.get("design"))
+            usability=int(request.POST.get("usability"))
+            content=int(request.POST.get("content"))
+            score=round((design+usability+content)/3,2)
+            rate.score=score
+            rate.save()
+            messages.success(request, f'You rated this project')
+            return HttpResponseRedirect(request.path_info)
+    else:
+        form = RatingsForm()
+    context = {
+        'project': project,
+        'form': form,
+        'ratings':ratings,
+        'raters':raters,
+        'already_rated':already_rated
+    }
+
+    return render(request,'project.html',context)
+
+
+@login_required(login_url='/accounts/login/')
+def my_profile(request):
+
+    profile=request.user.profile
+
+    my_projects=Project.filter_by_userid(request.user.id)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Profile updated successfully')
+            return redirect('my_profile')
+    else:
+       form = UserProfileForm(instance=request.user.profile)
+    context={
+        'profile':profile,
+        'projects':my_projects,
+        'form':form
+    }
+    return render(request, 'my_profile.html',context)
+
+@login_required(login_url='/accounts/login/')
+def search_projects(request):
+
+    if 'search_project' in request.GET and request.GET["search_project"]:
+        search_term = request.GET.get("search_project")
+        projects =Project.search_project(search_term)
+        message = f"{search_term}"
+
+        context={
+          "message":message,
+          'projects':projects
+        }
+        return render(request, 'search.html',context)
+
+    else:
+        message = "You haven't searched for any projetc"
+        context={
+          "message":message,
+        }
+        return render(request, 'search.html',context)
+
+
+
+class ProfileList(APIView):
+    def get(self,request,format=None):
+        all_profiles = Profile.objects.all()
+        serializers = ProfileSerializer(all_profiles,many=True)
+        return Response(serializers.data)
+
+
+
+
+class ProjectsList(APIView):
+    def get(self,request,format=None):
+        all_projects = Project.objects.all()
+        serializers = ProjectsSerializer(all_projects,many=True)
+        return Response(serializers.data)
