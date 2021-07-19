@@ -90,3 +90,33 @@ def submit_project(request):
     }
 
     return render(request,'new_project.html',context)
+
+def get_project_ratings_av(prj_id):
+    ratings=Rating.get_project_ratings(prj_id)
+    if ratings:
+        design_ratings = [int(d.design) for d in ratings]
+        design_avg = round(sum(design_ratings) / len(design_ratings),2)
+
+        usability_ratings = [int(us.usability) for us in ratings]
+        usability_avg = round(sum(usability_ratings) / len(usability_ratings),2)
+
+        content_ratings = [int(content.content) for content in ratings]
+        content_avg = round(sum(content_ratings) / len(content_ratings),2)
+
+        score_avg = round((design_avg+usability_avg+content_avg)/3,2)
+
+        av_ratings={
+            'design':design_avg,
+            'usability':usability_avg,
+            'content':content_avg,
+            'score':score_avg,
+        }
+        return av_ratings
+    else:
+        av_ratings={
+        'design':0.00,
+        'usability':0.00,
+        'content':0.00,
+        'score':0.00,
+        }
+        return av_ratings
