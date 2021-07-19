@@ -41,3 +41,26 @@ def register_user(request):
   else:
       form = SignUpForm()
   return render(request, 'registration/registration_form.html', {'form': form})
+
+  
+def user_login(request):
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+
+            if user.is_active:
+                login(request, user)
+
+                return HttpResponseRedirect(reverse("home_page"))
+            else:
+                return HttpResponseRedirect(reverse("user_login"))
+
+        else:
+            return HttpResponseRedirect(reverse("user_login"))
+    else:
+        return render(request, "registration/login_form.html", context={})
