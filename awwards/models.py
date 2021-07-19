@@ -25,3 +25,20 @@ def update_profile_signal(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     instance.profile.save()
+
+
+class Project(models.Model):
+    """
+    Project class to define project Objects
+    """
+    title = models.CharField(max_length=155)
+    url = models.URLField(max_length=255)
+    description = models.TextField(max_length=255)
+    technologies = models.CharField(max_length=200, blank=True)
+    cover_photo = CloudinaryField('cover_photo',blank=True)
+    # cover_photo = ImageField(blank=True, manual_crop="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title 
