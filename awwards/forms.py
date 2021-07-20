@@ -17,3 +17,19 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username','email', 'password1', 'password2',)
+
+
+class ProjectForm(forms.ModelForm):
+    cover_photo = CloudinaryField('cover_photo',blank=True)
+    # cover_photo = ImageField(label='')
+    url = forms.URLField(label='Live site')
+    widgets = {
+          "title":forms.TextInput(attrs={"class":"form-control mb-4"}),
+          "description":forms.Textarea(attrs={'cols': 110, 'rows': 15,"class":"form-control mb-4"}),
+          "live_site":forms.URLInput(attrs={"class":"form-control mb-4"}),
+          "technologies":forms.TextInput(attrs={"class":"form-control mb-4"}),
+      }
+
+    class Meta:
+        model = Project
+        fields = ('title','description','cover_photo', 'url','technologies')
