@@ -8,6 +8,9 @@ from .models import Project,Rating,Profile
 import datetime
 import random
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializer import ProfileSerializer,ProjectsSerializer
 # Create your views here.
 
 def home_page(request):
